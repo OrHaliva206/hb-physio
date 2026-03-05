@@ -1,9 +1,14 @@
 import { useState } from 'react';
-import { Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, ChevronDown, ChevronUp, PenLine } from 'lucide-react';
 import VoiceButton from './VoiceButton';
 import LeadEditForm from './LeadEditForm';
 import Spinner from '../ui/Spinner';
 import { parseLeadText } from '../../utils/aiParser';
+
+const EMPTY_LEAD = {
+  name: '', phone: '', address: '', complaint: '',
+  preferredHours: '', blackoutTimes: '', recurring: false, rawText: '',
+};
 
 export default function AddLeadPanel() {
   const [open, setOpen] = useState(false);
@@ -30,7 +35,7 @@ export default function AddLeadPanel() {
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-5 py-4 text-start rounded-2xl"
-        style={{ backgroundColor: open ? '#FFFBF5' : '#FFFBF5' }}
+        style={{ backgroundColor: '#FFFBF5' }}
       >
         <span className="font-semibold text-gray-800">+ הוסף ליד חדש</span>
         {open ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
@@ -56,7 +61,14 @@ export default function AddLeadPanel() {
                   className="flex items-center gap-2 px-4 py-2 bg-[#E86A3E] text-white rounded-lg text-sm font-medium hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <Sparkles size={15} />
-                  נתח עם AI
+                  הוסף
+                </button>
+                <button
+                  onClick={() => setParsedData(EMPTY_LEAD)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  <PenLine size={15} />
+                  הוסף ידנית
                 </button>
               </div>
               {isParsing && <Spinner text="מנתח טקסט..." />}

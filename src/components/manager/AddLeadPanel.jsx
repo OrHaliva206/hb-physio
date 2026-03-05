@@ -15,6 +15,7 @@ export default function AddLeadPanel() {
   const [rawText, setRawText] = useState('');
   const [parsedData, setParsedData] = useState(null);
   const [isParsing, setIsParsing] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
 
   async function handleParse() {
     if (!rawText.trim()) return;
@@ -28,6 +29,7 @@ export default function AddLeadPanel() {
     setRawText('');
     setParsedData(null);
     setIsParsing(false);
+    setVoiceError('');
   }
 
   return (
@@ -54,7 +56,10 @@ export default function AddLeadPanel() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E86A3E] resize-none"
               />
               <div className="flex items-center gap-2 flex-wrap">
-                <VoiceButton onTranscript={t => setRawText(t)} />
+                <VoiceButton
+                  onParsed={data => setParsedData(data)}
+                  onError={msg => setVoiceError(msg)}
+                />
                 <button
                   onClick={handleParse}
                   disabled={!rawText.trim() || isParsing}
@@ -72,6 +77,7 @@ export default function AddLeadPanel() {
                 </button>
               </div>
               {isParsing && <Spinner text="מנתח טקסט..." />}
+              {voiceError && <p className="text-red-500 text-xs">{voiceError}</p>}
             </>
           ) : (
             <LeadEditForm

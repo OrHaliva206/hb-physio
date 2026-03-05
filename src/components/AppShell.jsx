@@ -8,9 +8,9 @@ export default function AppShell() {
   const isManager = role === 'manager';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FDF8F2' }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-30">
+      <header className="border-b border-[#F0E8DC] shadow-sm sticky top-0 z-30" style={{ backgroundColor: '#FFFBF5' }}>
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#E86A3E]">

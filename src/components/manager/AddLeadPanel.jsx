@@ -26,10 +26,11 @@ export default function AddLeadPanel() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-4">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 border-s-4 border-s-[#E86A3E] mb-4">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-5 py-4 text-start"
+        className="w-full flex items-center justify-between px-5 py-4 text-start rounded-2xl"
+        style={{ backgroundColor: open ? '#FFFBF5' : '#FFFBF5' }}
       >
         <span className="font-semibold text-gray-800">+ הוסף ליד חדש</span>
         {open ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}

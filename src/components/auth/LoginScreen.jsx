@@ -12,7 +12,7 @@ function NameScreen() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FDF8F2] px-4">
       <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm space-y-5">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#E86A3E] mb-3">
@@ -57,7 +57,7 @@ export default function LoginScreen({ pendingName }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FDF8F2] px-4">
       <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm space-y-6">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#E86A3E] mb-3">

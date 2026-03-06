@@ -11,6 +11,8 @@ export const mockLeads = [
     recurring: true,
     status: 'open',
     claimedBy: null,
+    priority: 'urgent',
+    notes: [{ id: 'n1', text: 'מטופלת ביקשה שנחזור אליה לפני הצהריים', author: 'מנהל', createdAt: '2026-03-01T10:00:00Z' }],
     rawText: 'דניאלה לוי, תל אביב, 054-3321987, כאבי גב תחתון, זמינה בבוקר',
   },
   {
@@ -25,6 +27,8 @@ export const mockLeads = [
     recurring: false,
     status: 'handling',
     claimedBy: 'שרה',
+    priority: 'normal',
+    notes: [],
     rawText: 'משה כהן רמת גן 052-7719034 שיקום ברך',
   },
   {
@@ -39,6 +43,8 @@ export const mockLeads = [
     recurring: true,
     status: 'contacted',
     claimedBy: 'יואב',
+    priority: 'normal',
+    notes: [],
     rawText: 'רינה אברהם חיפה הרצל 8, 050-5518762, כתף קפואה',
   },
   {
@@ -53,6 +59,8 @@ export const mockLeads = [
     recurring: false,
     status: 'flexible',
     claimedBy: null,
+    priority: 'normal',
+    notes: [],
     rawText: 'אמיר שלום ירושלים 058-9934521 כאבי צוואר',
   },
 ];

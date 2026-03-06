@@ -1,9 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
-import { Phone, MapPin, Clock, Ban, RefreshCw, Trash2, User, HeartPulse, ChevronDown } from 'lucide-react';
+import { Phone, MapPin, Clock, Ban, RefreshCw, Trash2, User, HeartPulse, ChevronDown, Flame, MessageSquare, Send } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import { useLeads } from '../../context/LeadsContext';
 import { useAuth } from '../../context/AuthContext';
-import { STATUS_COLORS, STATUS_LABELS } from '../../config';
+import { STATUS_COLORS, STATUS_LABELS, PRIORITY_LABEL } from '../../config';
 
 const ALL_STATUSES = ['open', 'handling', 'contacted', 'flexible'];
 
@@ -52,10 +52,87 @@ function StatusDropdown({ currentStatus, onChange }) {
   );
 }
 
+function NotesSection({ lead }) {
+  const { addNote } = useLeads();
+  const { name, role } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
+
+  const notes = lead.notes || [];
+
+  function handleAdd() {
+    if (!text.trim()) return;
+    addNote(lead.id, text.trim(), name || (role === 'manager' ? 'מנהל' : 'פיזיו'));
+    setText('');
+  }
+
+  function relativeTime(iso) {
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'עכשיו';
+    if (mins < 60) return `לפני ${mins} דק׳`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `לפני ${hrs} שע׳`;
+    return new Date(iso).toLocaleDateString('he-IL', { day: 'numeric', month: 'short' });
+  }
+
+  return (
+    <div className="border-t border-gray-100 pt-3">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+      >
+        <MessageSquare size={13} />
+        <span>הערות</span>
+        {notes.length > 0 && (
+          <span className="bg-gray-100 text-gray-600 rounded-full px-1.5 py-0.5 text-[10px] font-medium">{notes.length}</span>
+        )}
+        <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="mt-2 space-y-2">
+          {notes.length > 0 && (
+            <div className="space-y-1.5">
+              {notes.map(note => (
+                <div key={note.id} className="bg-gray-50 rounded-lg px-3 py-2 text-xs">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <span className="font-semibold text-gray-700">{note.author}</span>
+                    <span className="text-gray-400">{relativeTime(note.createdAt)}</span>
+                  </div>
+                  <p className="text-gray-600">{note.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={text}
+              onChange={e => setText(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAdd()}
+              placeholder="הוסף הערה..."
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#E86A3E]"
+            />
+            <button
+              onClick={handleAdd}
+              disabled={!text.trim()}
+              className="flex items-center gap-1 px-3 py-1.5 bg-[#E86A3E] text-white rounded-lg text-xs font-medium hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <Send size={11} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function LeadCard({ lead }) {
-  const { updateStatus, deleteLead } = useLeads();
+  const { updateStatus, updatePriority, deleteLead } = useLeads();
   const { role, name } = useAuth();
   const borderColor = STATUS_COLORS[lead.status]?.border || 'border-gray-300';
+  const isUrgent = lead.priority === 'urgent';
 
   function handleDelete() {
     if (window.confirm(`האם אתה בטוח שברצונך למחוק את הליד של ${lead.name}?`)) {
@@ -65,7 +142,7 @@ export default function LeadCard({ lead }) {
 
   function handleStatusChange(newStatus) {
     const claimedBy = newStatus === 'open' ? null : (name || 'פיזיו');
-    updateStatus(lead.id, newStatus, claimedBy);
+    updateStatus(lead.id, newStatus, claimedBy, name || (role === 'manager' ? 'מנהל' : 'פיזיו'));
   }
 
   const dateStr = new Date(lead.createdAt).toLocaleDateString('he-IL', {
@@ -73,18 +150,48 @@ export default function LeadCard({ lead }) {
   });
 
   return (
-    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 border-s-4 ${borderColor} p-4 space-y-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}>
+    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 border-s-4 ${borderColor} overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}>
+      {/* Urgent banner */}
+      {isUrgent && (
+        <div className="bg-red-500 text-white text-xs font-bold px-4 py-1.5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Flame size={13} className="animate-pulse" />
+            דחוף — יצירת קשר מיידי
+          </div>
+          {role === 'manager' && (
+            <button
+              onClick={() => updatePriority(lead.id, 'normal')}
+              className="text-red-200 hover:text-white text-[10px] font-normal underline transition-colors"
+            >
+              הסר
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="p-4 space-y-3">
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
-        <div>
+        <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-gray-900 text-base">{lead.name}</h3>
           <p className="text-xs text-gray-400 mt-0.5">{dateStr}</p>
         </div>
-        {role === 'manager' && (
-          <button onClick={handleDelete} className="text-gray-300 hover:text-red-400 transition-colors mt-0.5">
-            <Trash2 size={16} />
-          </button>
-        )}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {role === 'manager' && !isUrgent && (
+            <button
+              onClick={() => updatePriority(lead.id, 'urgent')}
+              title="סמן כדחוף"
+              className="p-1.5 rounded-lg text-gray-300 hover:text-red-400 transition-colors"
+            >
+              <Flame size={15} />
+            </button>
+          )}
+          {role === 'manager' && (
+            <button onClick={handleDelete} className="text-gray-300 hover:text-red-400 transition-colors p-1">
+              <Trash2 size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Fields */}
@@ -132,6 +239,10 @@ export default function LeadCard({ lead }) {
       {/* Status dropdown */}
       <div className="pt-1">
         <StatusDropdown currentStatus={lead.status} onChange={handleStatusChange} />
+      </div>
+
+      {/* Notes */}
+      <NotesSection lead={lead} />
       </div>
     </div>
   );

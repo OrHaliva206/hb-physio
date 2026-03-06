@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Flame } from 'lucide-react';
 import { useLeads } from '../../context/LeadsContext';
 
 const fields = [
@@ -64,6 +65,19 @@ export default function LeadEditForm({ initialData, onCancel, onPublished }) {
         />
         <label htmlFor="recurring" className="text-sm text-gray-700">טיפול חוזר</label>
       </div>
+
+      <button
+        type="button"
+        onClick={() => handleChange('priority', form.priority === 'urgent' ? 'normal' : 'urgent')}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors w-fit ${
+          form.priority === 'urgent'
+            ? 'bg-red-50 text-red-600 border-red-200'
+            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+        }`}
+      >
+        <Flame size={14} />
+        {form.priority === 'urgent' ? 'מסומן כדחוף' : 'סמן כדחוף'}
+      </button>
 
       <div className="flex gap-2 pt-2">
         <button

@@ -17,6 +17,9 @@ export default function LeadFeed() {
   const filtered = leads
     .filter(l => !filter || l.address?.toLowerCase().includes(filter.toLowerCase()))
     .sort((a, b) => {
+      // Urgent leads always float to top
+      if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+      if (b.priority === 'urgent' && a.priority !== 'urgent') return 1;
       if (sort === 'date') return new Date(b.createdAt) - new Date(a.createdAt);
       return (a.address || '').localeCompare(b.address || '', 'he');
     });

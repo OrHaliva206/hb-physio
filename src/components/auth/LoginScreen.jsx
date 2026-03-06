@@ -1,5 +1,60 @@
 import { useState } from 'react';
+import { X, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+
+function ProfilePicker({ onUsePassword }) {
+  const { profiles, loginFromProfile, deleteProfile } = useAuth();
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#FDF8F2] px-4">
+      <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm space-y-6">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#E86A3E] mb-3">
+            <span className="text-white font-extrabold text-2xl tracking-tight">HB</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-800">HB Physio</h1>
+          <p className="text-sm text-gray-500 mt-1">מי את/ה?</p>
+        </div>
+
+        <div className="space-y-2">
+          {profiles.map(profile => (
+            <div key={profile.id} className="relative group">
+              <button
+                onClick={() => loginFromProfile(profile)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-[#E86A3E] hover:bg-orange-50 transition-all text-start"
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0 ${
+                  profile.role === 'manager' ? 'bg-[#E86A3E]' : 'bg-gray-400'
+                }`}>
+                  {profile.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800 text-sm">{profile.name}</p>
+                  <p className="text-xs text-gray-400">{profile.role === 'manager' ? 'מנהל' : 'פיזיותרפיסט'}</p>
+                </div>
+              </button>
+              <button
+                onClick={() => deleteProfile(profile.id)}
+                className="absolute top-2 end-2 w-6 h-6 flex items-center justify-center text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-red-50"
+                title="הסר פרופיל"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={onUsePassword}
+          className="w-full text-sm text-gray-400 hover:text-gray-600 transition-colors py-1 flex items-center justify-center gap-1.5"
+        >
+          <Users size={14} />
+          כניסה עם סיסמה
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function NameScreen() {
   const { setName } = useAuth();
@@ -43,12 +98,10 @@ function NameScreen() {
   );
 }
 
-export default function LoginScreen({ pendingName }) {
+function PasswordScreen({ onBack }) {
   const { login } = useAuth();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-
-  if (pendingName) return <NameScreen />;
 
   function handleLogin(e) {
     e.preventDefault();
@@ -87,7 +140,31 @@ export default function LoginScreen({ pendingName }) {
             כניסה
           </button>
         </form>
+
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="w-full text-sm text-gray-400 hover:text-gray-600 transition-colors py-1"
+          >
+            חזור לבחירת פרופיל
+          </button>
+        )}
       </div>
     </div>
+  );
+}
+
+export default function LoginScreen({ pendingName }) {
+  const { profiles } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+
+  if (pendingName) return <NameScreen />;
+
+  if (profiles.length > 0 && !showPassword) {
+    return <ProfilePicker onUsePassword={() => setShowPassword(true)} />;
+  }
+
+  return (
+    <PasswordScreen onBack={profiles.length > 0 ? () => setShowPassword(false) : null} />
   );
 }

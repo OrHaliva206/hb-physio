@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { validatePassword } from '../utils/auth';
 
 const AuthContext = createContext(null);
@@ -9,6 +9,31 @@ export function AuthProvider({ children }) {
     return stored ? JSON.parse(stored) : { role: null, name: '', pendingRole: null };
   });
 
+  const [profiles, setProfiles] = useState(() => {
+    const stored = localStorage.getItem('hb_profiles');
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('hb_profiles', JSON.stringify(profiles));
+  }, [profiles]);
+
+  function addProfile(role, name) {
+    const exists = profiles.find(p => p.name === name && p.role === role);
+    if (exists) return;
+    setProfiles(prev => [...prev, { id: crypto.randomUUID(), name, role, createdAt: new Date().toISOString() }]);
+  }
+
+  function deleteProfile(id) {
+    setProfiles(prev => prev.filter(p => p.id !== id));
+  }
+
+  function loginFromProfile(profile) {
+    const next = { role: profile.role, name: profile.name, pendingRole: null };
+    localStorage.setItem('hb_auth', JSON.stringify(next));
+    setAuth(next);
+  }
+
   function login(password) {
     const detectedRole = validatePassword(password);
     if (!detectedRole) return false;
@@ -17,6 +42,7 @@ export function AuthProvider({ children }) {
       const next = { role: 'manager', name: 'מנהל', pendingRole: null };
       localStorage.setItem('hb_auth', JSON.stringify(next));
       setAuth(next);
+      addProfile('manager', 'מנהל');
     } else {
       const stored = JSON.parse(localStorage.getItem('hb_auth') || '{}');
       if (stored.name && stored.role === 'physio') {
@@ -24,7 +50,6 @@ export function AuthProvider({ children }) {
         localStorage.setItem('hb_auth', JSON.stringify(next));
         setAuth(next);
       } else {
-        // Physio without a saved name — ask for it first
         setAuth({ role: null, name: '', pendingRole: 'physio' });
       }
     }
@@ -35,6 +60,7 @@ export function AuthProvider({ children }) {
     const next = { role: 'physio', name, pendingRole: null };
     localStorage.setItem('hb_auth', JSON.stringify(next));
     setAuth(next);
+    addProfile('physio', name);
   }
 
   function logout() {
@@ -43,7 +69,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ ...auth, login, logout, setName }}>
+    <AuthContext.Provider value={{ ...auth, login, logout, setName, profiles, loginFromProfile, deleteProfile }}>
       {children}
     </AuthContext.Provider>
   );
